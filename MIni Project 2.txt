@@ -1,0 +1,375 @@
+dbConnnection.java
+-------------------------------------
+package mini2;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class dbConnection {
+
+	
+		public static PreparedStatement ps=null;
+		public static Connection con = null;
+		
+		public void Conectionn() throws ClassNotFoundException
+		{
+			try
+			{
+				Class.forName("com.mysql.jdbc.Driver");
+				con=DriverManager.getConnection("jdbc:mysql://localhost:3306/db2","root","asrith");
+				
+				if(con!=null)
+				{
+					System.out.println("Connected");
+				}
+				else
+				{
+					System.out.println("Not Connected");
+				}
+			}
+			catch(SQLException e)
+			{
+				System.out.println(e);
+			}
+		}
+
+	}
+
+
+
+
+-------------------------------
+
+main
+--------------
+package mini2;
+
+import java.util.Scanner;
+
+public class Main {
+
+	static Scanner sc= new Scanner(System.in);
+	public static void main(String[] args) throws ClassNotFoundException 
+	{
+		dbConnection d=new dbConnection();
+		d.Conectionn();
+		
+		while(true)
+		{
+			System.out.println("Choose the following..");
+			System.out.println("1.AddEmp\n2.EditEmp\n3.ManagerHirarichy\n4.Resign\n5.status\n6.Exit");
+			int n=sc.nextInt();
+			
+			switch (n) {
+			
+			case 1: addEmployee e = new addEmployee();
+					e.addEmp();
+				    break;
+				    
+			case 2: editEmployee e1= new editEmployee();
+					e1.editEmp();
+					break;
+					
+			case 3: managerHi mH= new managerHi();
+					mH.mView();
+					break;
+
+			case 4: eResign r= new eResign();
+					r.reg();
+					break;
+			case 5: statusCheck s= new statusCheck();
+			s.eStatus();
+			        break;
+			case 6: System.exit(0);
+			        break;
+			default: System.out.println("Enter a vaild choose");
+				break;
+			}
+			
+		}
+
+	}
+
+}
+----------------------------
+addEmployee.java
+
+package mini2;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+
+public class addEmployee 
+{
+	Scanner sc = new Scanner(System.in);
+	public void addEmp()
+	{
+		try
+		{
+			
+			
+			String sql = "insert into emp2"+"(eId,eName,eManager,eProDate,eProName,eStatus,ePick,eDrop,eDependent) values"+ "(?,?,?,?,?,?,?,?,?);";					
+			
+			dbConnection.ps=dbConnection.con.prepareStatement(sql);
+			
+			System.out.println("Enter EId");
+			dbConnection.ps.setInt(1, sc.nextInt());
+			
+			System.out.println("Enter Name");
+			dbConnection.ps.setString(2, sc.next());
+			
+			System.out.println("Enter Manager Name");
+			dbConnection.ps.setString(3, sc.next());
+			
+			System.out.println("Enter Project Date");
+			dbConnection.ps.setString(4, sc.next());
+			
+			System.out.println("Enter Project Name");
+			dbConnection.ps.setString(5, sc.next());
+			
+			System.out.println("Enter Empoyee status");
+			dbConnection.ps.setString(6, sc.next());
+			
+			System.out.println("Enter Pick Location");
+			dbConnection.ps.setString(7, sc.next());
+			
+			System.out.println("Enter Drop Location");
+			dbConnection.ps.setString(8, sc.next());
+			
+			System.out.println("Enter Dependent Name");
+			dbConnection.ps.setString(9, sc.next());
+			
+			
+			int k=dbConnection.ps.executeUpdate();
+			
+			if(k==1)
+			{
+				System.out.println("Inserted Sucussfully");
+			}
+			else
+			{
+				System.out.println("Not inserted");
+			}
+			
+		}
+		catch(SQLException e)
+		{
+			System.out.println(e);
+		}
+	}
+
+}
+------------------------------
+editEmployee.java
+
+package mini2;
+
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class editEmployee {
+	
+	static Scanner sc = new Scanner(System.in);
+	public void editEmp() throws ClassNotFoundException
+	{
+		try
+		{
+			statusCheck s= new statusCheck();
+			s.eStatus();
+			
+			
+//			System.out.println("Enter your id to update details");
+//			int etu=sc.nextInt();
+			System.out.println("Please Enter the following details");
+			
+			
+			String sql1= "update emp2 set eName=?,eManager=?,eStatus=?,ePick=?,eDrop=?,eDependent=? where eId=?";
+					
+			dbConnection.ps=dbConnection.con.prepareStatement(sql1);
+			
+			
+			System.out.println("Enter Name");
+			dbConnection.ps.setString(1, sc.next());
+			
+			System.out.println("Enter Manager Name");
+			dbConnection.ps.setString(2, sc.next());
+			
+			System.out.println("Enter Empoyee status");
+			dbConnection.ps.setString(3, sc.next());
+			
+			System.out.println("Enter Pick Location");
+			dbConnection.ps.setString(4, sc.next());
+			
+			System.out.println("Enter Drop Location");
+			dbConnection.ps.setString(5, sc.next());
+			
+			System.out.println("Enter Dependent Name");
+			dbConnection.ps.setString(6, sc.next());
+			
+			dbConnection.ps.setInt(7, s.id);
+			
+			
+			int k=dbConnection.ps.executeUpdate();
+			if(k==1)
+			{
+				System.out.println("Data Updated Sucussfull");
+			}
+			else
+			{
+				System.out.println("Data Not Updated.. Enter a valid emp Id to update");
+			}
+			
+		}
+		catch(SQLException e)
+		{
+			System.out.println(e);
+		}
+	}
+
+}
+-----------------------------
+managerHi.java
+
+package mini2;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class managerHi {
+	
+	public void mView() throws ClassNotFoundException
+	{
+		try {
+		int k=0;
+		System.out.println("Enter Your Name to show employess under you");
+		String manName=Main.sc.next();
+
+		String sql = "select * from emp2 where eManager=?";
+		
+		
+		dbConnection.ps=dbConnection.con.prepareStatement(sql);
+		dbConnection.ps.setString(1, manName);
+		
+		ResultSet rs= dbConnection.ps.executeQuery();
+		
+		while(rs.next())
+		{
+			System.out.println(rs.getInt(1)+" "+rs.getString(2)+" "+rs.getString(4)+" "+rs.getString(5)+" "+rs.getString(6)+" "+rs.getString(7)+" "+rs.getString(8));
+			k++;
+		}
+		
+		if(k==0)
+		{
+			System.out.println("No employees under "+manName);
+		}
+		
+		
+	}
+	catch(SQLException e)
+	{
+		System.out.println(e);
+	}
+	}
+
+}
+--------------------------------------
+statusCheck.java
+
+package mini2;
+
+import java.sql.ResultSet;
+import java.util.Scanner;
+
+public class statusCheck {
+	
+	static Scanner sc= new Scanner(System.in);
+	static int id;
+	public void eStatus() throws ClassNotFoundException
+	{
+		try {
+		System.out.println("Enter you Id to continue");
+		id= sc.nextInt();
+		
+		String sql="select eStatus from emp2 where eId=?";
+		dbConnection.ps=dbConnection.con.prepareStatement(sql);
+		
+		dbConnection.ps.setInt(1, id);
+		ResultSet rs1= dbConnection.ps.executeQuery();
+		rs1.next();
+		
+		if((rs1.getString(1)).equals("resigned"))
+		{
+			System.out.println("You are not the part of the organization\nYou don't have access");
+			System.exit(0);
+		}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+		}
+		
+	}
+
+}
+---------------------------------
+
+eResign.java
+-----------------
+package mini2;
+
+import java.util.Scanner;
+
+public class eResign {
+	Scanner sc = new Scanner(System.in);
+
+	public void reg() {
+
+		try {
+//			System.out.println("Enter Your id to show employee active/inactive");
+//			String eId = Main.sc.next();
+			
+			statusCheck s= new statusCheck();
+			s.eStatus();
+			
+			
+			String sql11= "update emp2 set eStatus=? where eId=?";
+			
+			dbConnection.ps=dbConnection.con.prepareStatement(sql11);
+			
+			dbConnection.ps.setString(1, "resigned");
+			dbConnection.ps.setInt(2, s.id);
+			int reg= dbConnection.ps.executeUpdate();
+			if(reg==1)
+			{
+				System.out.println("You are sucussfully regsined");
+			}			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+	}
+
+}
+----------------------------
+pom.xml
+
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>pack2</groupId>
+  <artifactId>mini2</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+ <dependencies>
+
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.33</version>
+		</dependency>
+
+
+	</dependencies>
+
+</project>
